@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find your ideal roommate — CampusNest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container navbar">
+    <a href="index.html" class="logo">Campus<span>Nest</span></a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="index.html#how-it-works">How It Works</a>
+      <a href="preferences.html" class="active">Find Roommate</a>
+      <a href="profile.html">My Profile</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-secondary">Login</a>
+      <a href="register.html" class="btn btn-primary">Get Started</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="page-head">
+      <div class="eyebrow">Step 2 of 2</div>
+      <h1>Find your ideal roommate</h1>
+      <p>Tell us what matters to you. We'll use these preferences to find compatible matches.</p>
+      <div class="progress-track">
+        <span class="done"></span>
+        <span class="done"></span>
+      </div>
+    </div>
+
+    <form id="preferences-form" novalidate style="margin: 32px 0 24px;">
+
+      <div class="pref-section">
+        <h3>What is your gender?</h3>
+        <p class="pref-note">Used to match you with compatible roommates.</p>
+        <div class="choice-grid">
+          <div class="choice-card">
+            <input type="radio" name="gender-pref" id="gp-male" value="Male">
+            <label for="gp-male"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Male</label>
+          </div>
+          <div class="choice-card">
+            <input type="radio" name="gender-pref" id="gp-female" value="Female">
+            <label for="gp-female"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Female</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="pref-section">
+        <h3>Preferred location</h3>
+        <p class="pref-note">Where would you like to live?</p>
+        <div class="field" style="max-width: 320px; margin-bottom: 0;">
+          <select id="pref-location">
+            <option>Dhonia</option>
+            <option>Niribili</option>
+            <option>Jalalabad</option>
+            <option>Islampur</option>
+            <option>Nobinagar</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="pref-section">
+        <h3>Monthly budget</h3>
+        <p class="pref-note">Set a range in Bangladeshi Taka (৳).</p>
+        <div class="budget-row">
+          <div class="field budget-field">
+            <label for="budget-min">Minimum</label>
+            <span class="currency">৳</span>
+            <input type="number" id="budget-min" placeholder="3000">
+          </div>
+          <div class="field budget-field">
+            <label for="budget-max">Maximum</label>
+            <span class="currency">৳</span>
+            <input type="number" id="budget-max" placeholder="6000">
+          </div>
+        </div>
+      </div>
+
+      <div class="pref-section">
+        <h3>Lifestyle</h3>
+        <p class="pref-note">Select all that describe how you like to live.</p>
+        <div class="choice-grid">
+          <div class="choice-card">
+            <input type="checkbox" name="lifestyle" value="Quiet" id="ls-quiet" checked>
+            <label for="ls-quiet"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Quiet</label>
+          </div>
+          <div class="choice-card">
+            <input type="checkbox" name="lifestyle" value="Clean" id="ls-clean" checked>
+            <label for="ls-clean"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Clean</label>
+          </div>
+          <div class="choice-card">
+            <input type="checkbox" name="lifestyle" value="Study-friendly" id="ls-study" checked>
+            <label for="ls-study"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Study-friendly</label>
+          </div>
+          <div class="choice-card">
+            <input type="checkbox" name="lifestyle" value="Social" id="ls-social">
+            <label for="ls-social"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Social</label>
+          </div>
+          <div class="choice-card">
+            <input type="checkbox" name="lifestyle" value="Non-smoker" id="ls-nonsmoker" checked>
+            <label for="ls-nonsmoker"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Non-smoker</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="pref-section">
+        <h3>Sleeping schedule</h3>
+        <p class="pref-note">When do you usually sleep and wake?</p>
+        <div class="choice-grid">
+          <div class="choice-card">
+            <input type="radio" name="sleep-schedule" value="Early Sleeper" id="ss-early" checked>
+            <label for="ss-early"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Early sleeper</label>
+          </div>
+          <div class="choice-card">
+            <input type="radio" name="sleep-schedule" value="Flexible" id="ss-flex">
+            <label for="ss-flex"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Flexible</label>
+          </div>
+          <div class="choice-card">
+            <input type="radio" name="sleep-schedule" value="Night Owl" id="ss-owl">
+            <label for="ss-owl"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Night owl</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="pref-section">
+        <h3>Cooking</h3>
+        <p class="pref-note">What is your preference regarding cooking?</p>
+        <div class="choice-grid">
+          <div class="choice-card">
+            <input type="radio" name="cooking-pref" id="ck-prefer" value="Prefer to cook">
+            <label for="ck-prefer"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Prefer to cook</label>
+          </div>
+          <div class="choice-card">
+            <input type="radio" name="cooking-pref" id="ck-occ" value="Occasionally cook">
+            <label for="ck-occ"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Occasionally cook</label>
+          </div>
+          <div class="choice-card">
+            <input type="radio" name="cooking-pref" id="ck-not" value="Prefer not to cook">
+            <label for="ck-not"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Prefer not to cook</label>
+          </div>
+          <div class="choice-card">
+            <input type="radio" name="cooking-pref" id="ck-none" value="No preference">
+            <label for="ck-none"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>No preference</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="pref-section">
+        <h3>Shared household expenses</h3>
+        <p class="pref-note">What is your preference regarding shared household expenses?</p>
+        <div class="choice-grid">
+          <div class="choice-card">
+            <input type="radio" name="expense-pref" id="ex-share" value="Prefer sharing expenses">
+            <label for="ex-share"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Prefer sharing expenses</label>
+          </div>
+          <div class="choice-card">
+            <input type="radio" name="expense-pref" id="ex-sep" value="Prefer separate expenses">
+            <label for="ex-sep"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Prefer separate expenses</label>
+          </div>
+          <div class="choice-card">
+            <input type="radio" name="expense-pref" id="ex-flex" value="Flexible">
+            <label for="ex-flex"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Flexible</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="pref-section">
+        <h3>Guests</h3>
+        <p class="pref-note">What is your preference regarding guests in the shared living space?</p>
+        <div class="choice-grid">
+          <div class="choice-card">
+            <input type="radio" name="guest-pref" id="gu-few" value="Prefer no/few guests">
+            <label for="gu-few"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Prefer no/few guests</label>
+          </div>
+          <div class="choice-card">
+            <input type="radio" name="guest-pref" id="gu-occ" value="Occasional guests are okay">
+            <label for="gu-occ"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Occasional guests are okay</label>
+          </div>
+          <div class="choice-card">
+            <input type="radio" name="guest-pref" id="gu-freq" value="Frequent guests are okay">
+            <label for="gu-freq"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Frequent guests are okay</label>
+          </div>
+          <div class="choice-card">
+            <input type="radio" name="guest-pref" id="gu-flex" value="Flexible">
+            <label for="gu-flex"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Flexible</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="pref-section">
+        <h3>Pets</h3>
+        <p class="pref-note">What is your preference regarding pets?</p>
+        <div class="choice-grid">
+          <div class="choice-card">
+            <input type="radio" name="pet-pref" id="pt-friendly" value="Pet-friendly">
+            <label for="pt-friendly"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Pet-friendly</label>
+          </div>
+          <div class="choice-card">
+            <input type="radio" name="pet-pref" id="pt-no" value="Prefer no pets">
+            <label for="pt-no"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>Prefer no pets</label>
+          </div>
+          <div class="choice-card">
+            <input type="radio" name="pet-pref" id="pt-none" value="No preference">
+            <label for="pt-none"><svg class="check-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7-3-3 1-1 2 2 6-6z"/></svg>No preference</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="pref-actions">
+        <a href="profile.html" class="btn btn-secondary btn-lg">Back</a>
+        <button type="submit" class="btn btn-primary btn-lg">Find My Matches</button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">CampusNest</div>
+    <div class="footer-meta">NITER Student Project · © 2026 CampusNest</div>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>

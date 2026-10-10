@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Match profile — CampusNest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container navbar">
+    <a href="index.html" class="logo">Campus<span>Nest</span></a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="index.html#how-it-works">How It Works</a>
+      <a href="preferences.html" class="active">Find Roommate</a>
+      <a href="profile.html">My Profile</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-secondary">Login</a>
+      <a href="register.html" class="btn btn-primary">Get Started</a>
+    </div>
+  </div>
+</header>
+
+<main id="match-profile-root">
+  <div class="container">
+    <div class="page-head" style="padding-bottom: 0;">
+      <a href="matches.html" style="font-size: 0.9rem;">← Back to matches</a>
+    </div>
+
+    <div class="demo-banner">This is a demo profile created for this prototype.</div>
+
+    <div class="profile-layout">
+
+      <div class="profile-main">
+        <div class="profile-header">
+          <div class="avatar" id="mp-avatar">SA</div>
+          <div>
+            <h1 id="mp-name" style="margin-bottom: 4px; font-size: 1.6rem;">Sarah Ahmed</h1>
+            <div class="match-meta" id="mp-meta">CSE • 3rd Year</div>
+          </div>
+        </div>
+
+        <dl class="profile-facts">
+          <div>
+            <dt>Preferred area</dt>
+            <dd id="mp-area">Dhonia</dd>
+          </div>
+          <div>
+            <dt>Budget</dt>
+            <dd id="mp-budget">৳4,500–5,500/month</dd>
+          </div>
+        </dl>
+
+        <div class="profile-section">
+          <h3>About</h3>
+          <p id="mp-about">Quiet and study-focused student looking for a clean and comfortable shared living environment.</p>
+        </div>
+
+        <div class="profile-section">
+          <h3>Why you match</h3>
+          <ul class="match-why" id="mp-why"></ul>
+        </div>
+
+        <div class="profile-section">
+          <h3>Possible differences</h3>
+          <ul class="match-diff" id="mp-diff"></ul>
+        </div>
+
+        <div class="profile-section">
+          <h3>Roommate preferences</h3>
+          <div class="tag-list" id="mp-prefs"></div>
+        </div>
+      </div>
+
+      <aside class="profile-side">
+        <div class="compat-ring-wrap">
+          <svg class="compat-ring" viewBox="0 0 160 160">
+            <circle cx="80" cy="80" r="70" fill="none" stroke="#e6e1d6" stroke-width="12"/>
+            <circle id="mp-ring-fill" cx="80" cy="80" r="70" fill="none" stroke="#2f6f62" stroke-width="12" stroke-linecap="round"/>
+          </svg>
+          <div class="compat-ring-center">
+            <span class="compat-ring-num" id="mp-compat-num">92%</span>
+            <span class="compat-ring-label">Compatible</span>
+          </div>
+        </div>
+        <p style="margin: 0; font-size: 0.9rem;">Compatibility score</p>
+        <button type="button" class="btn btn-accent btn-block" id="send-request-btn">Send Roommate Request</button>
+        <div class="disclaimer">This is a prototype — no message is actually sent.</div>
+      </aside>
+
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">CampusNest</div>
+    <div class="footer-meta">NITER Student Project · © 2026 CampusNest</div>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>

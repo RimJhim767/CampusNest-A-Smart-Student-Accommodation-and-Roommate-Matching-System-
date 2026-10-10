@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My requests — CampusNest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container navbar">
+    <a href="index.html" class="logo">Campus<span>Nest</span></a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="index.html#how-it-works">How It Works</a>
+      <a href="preferences.html">Find Roommate</a>
+      <a href="profile.html">My Profile</a>
+      <a href="requests.html" class="active">Requests</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-secondary">Login</a>
+      <a href="register.html" class="btn btn-primary">Get Started</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="page-head">
+      <div class="eyebrow">Roommate requests</div>
+      <h1>My requests</h1>
+      <p>Send, answer and manage roommate requests. Your preferences stay private until you choose what to share.</p>
+    </div>
+
+    <div class="demo-banner">
+      Temporary test tool: matching is not built yet, so you send a request by typing another student's ID.
+      Your own student ID is <strong id="rq-my-id">…</strong>.
+    </div>
+
+    <div class="pref-section" style="margin: 24px 0 36px;">
+      <h3>Send a request</h3>
+      <p class="pref-note">Enter the student ID of the person you would like to room with.</p>
+      <div class="field" style="max-width: 280px;">
+        <label for="rq-receiver-id">Student ID</label>
+        <input type="number" id="rq-receiver-id" min="1" placeholder="e.g. 2">
+        <div class="field-error"></div>
+      </div>
+      <button type="button" class="btn btn-primary" id="rq-send-btn">Send request</button>
+    </div>
+
+    <div class="pref-section" id="rq-shared-panel" style="display: none; margin-bottom: 36px;">
+      <div id="rq-shared-body"></div>
+    </div>
+
+    <h2>Received requests</h2>
+    <div class="match-grid" id="rq-received"></div>
+
+    <h2 style="margin-top: 44px;">Sent requests</h2>
+    <div class="match-grid" id="rq-sent" style="margin-bottom: 64px;"></div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">CampusNest</div>
+    <div class="footer-meta">NITER Student Project · © 2026 CampusNest</div>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>

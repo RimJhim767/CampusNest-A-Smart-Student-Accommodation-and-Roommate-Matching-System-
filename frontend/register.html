@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create your account — CampusNest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container navbar">
+    <a href="index.html" class="logo">Campus<span>Nest</span></a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="index.html#how-it-works">How It Works</a>
+      <a href="preferences.html">Find Roommate</a>
+      <a href="profile.html">My Profile</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-secondary">Login</a>
+      <a href="register.html" class="btn btn-primary">Get Started</a>
+    </div>
+  </div>
+</header>
+
+<main class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-eyebrow">Join CampusNest</div>
+    <h1>Create your CampusNest account</h1>
+    <p class="auth-sub">Set up your account to start finding a compatible roommate.</p>
+
+    <form id="register-form" novalidate>
+      <div class="field">
+        <label for="full-name">Full name</label>
+        <input type="text" id="full-name" name="full-name" placeholder="e.g. Sarah Ahmed">
+        <div class="field-error"></div>
+      </div>
+
+      <div class="field">
+        <label for="niter-email">NITER email</label>
+        <input type="email" id="niter-email" name="niter-email" placeholder="yourname@niter.edu.bd">
+        <div class="field-error"></div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="password-field">
+          <input type="password" id="password" name="password" placeholder="At least 6 characters">
+          <button type="button" class="password-toggle" data-target="password">Show</button>
+        </div>
+        <div class="field-error"></div>
+      </div>
+
+      <div class="field">
+        <label for="confirm-password">Confirm password</label>
+        <div class="password-field">
+          <input type="password" id="confirm-password" name="confirm-password" placeholder="Re-enter your password">
+          <button type="button" class="password-toggle" data-target="confirm-password">Show</button>
+        </div>
+        <div class="field-error"></div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Create Account</button>
+    </form>
+
+    <div class="auth-foot">Already have an account? <a href="login.html">Log in</a></div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">CampusNest</div>
+    <div class="footer-meta">NITER Student Project · © 2026 CampusNest</div>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>

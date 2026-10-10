@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tell us about yourself — CampusNest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container navbar">
+    <a href="index.html" class="logo">Campus<span>Nest</span></a>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="index.html#how-it-works">How It Works</a>
+      <a href="preferences.html">Find Roommate</a>
+      <a href="profile.html" class="active">My Profile</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-secondary">Login</a>
+      <a href="register.html" class="btn btn-primary">Get Started</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="page-head">
+      <div class="eyebrow">Step 1 of 2</div>
+      <h1>Tell us about yourself</h1>
+      <p>Help us understand what you're looking for in a roommate.</p>
+      <div class="progress-track">
+        <span class="done"></span>
+        <span></span>
+      </div>
+    </div>
+
+    <div style="max-width: 640px; margin: 32px 0 72px;">
+      <form id="profile-form" novalidate>
+        <div class="field">
+          <label for="p-full-name">Full name</label>
+          <input type="text" id="p-full-name" data-required="true" placeholder="e.g. Sarah Ahmed">
+          <div class="field-error"></div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="p-department">Department</label>
+            <select id="p-department" data-required="true">
+              <option value="">Select department</option>
+              <option>Computer Science &amp; Engineering</option>
+              <option>Textile Engineering</option>
+              <option>Industrial &amp; Production Engineering</option>
+              <option>Electrical &amp; Electronic Engineering</option>
+              <option>Other</option>
+            </select>
+            <div class="field-error"></div>
+          </div>
+          <div class="field">
+            <label for="p-year">Year / semester</label>
+            <select id="p-year" data-required="true">
+              <option value="">Select year</option>
+              <option>1st Year</option>
+              <option>2nd Year</option>
+              <option>3rd Year</option>
+              <option>4th Year</option>
+            </select>
+            <div class="field-error"></div>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="p-gender">Gender</label>
+            <select id="p-gender" data-required="true">
+              <option value="">Select gender</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+            <div class="field-error"></div>
+          </div>
+          <div class="field">
+            <label for="p-area">Preferred area</label>
+            <select id="p-area" data-required="true">
+              <option value="">Select area</option>
+              <option>Dhonia</option>
+              <option>Niribili</option>
+              <option>Jalalabad</option>
+              <option>Islampur</option>
+              <option>Nobinagar</option>
+            </select>
+            <div class="field-error"></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="p-budget">Monthly budget (৳)</label>
+          <input type="number" id="p-budget" data-required="true" placeholder="e.g. 5000">
+          <div class="field-error"></div>
+        </div>
+
+        <div class="field">
+          <label for="p-about">About me</label>
+          <textarea id="p-about" placeholder="Tell future roommates a little about how you live and study."></textarea>
+          <div class="hint">Optional, but a good introduction helps you match faster.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg">Continue</button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">CampusNest</div>
+    <div class="footer-meta">NITER Student Project · © 2026 CampusNest</div>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>
