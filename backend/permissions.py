@@ -1,7 +1,7 @@
 # CampusNest — Phase 5: who may see which preference fields.
 # ALL privacy decisions about shared preferences are made in this one file.
 from models import (
-    PreferenceShare, RoommateRequest, STATUS_ACCEPTED, make_pair_key,
+    PreferenceShare, RoommateRequest, STATUS_ACCEPTED, WhatsAppShare, make_pair_key,
 )
 from validation import PREFERENCE_FIELD_ORDER
 
@@ -47,3 +47,24 @@ def get_share_fields(request_id, owner_id):
     if share is None or not share.fields:
         return []
     return [f for f in PREFERENCE_FIELD_ORDER if f in share.fields]
+
+
+def get_whatsapp_share(request_id, owner_id):
+    """Return the owner's contact-share row for a request, if consent is active."""
+    req = RoommateRequest.query.filter_by(
+        id=request_id, status=STATUS_ACCEPTED).first()
+    if req is None or owner_id not in (req.requester_id, req.receiver_id):
+        return None
+    return WhatsAppShare.query.filter_by(request_id=request_id, owner_id=owner_id).first()
+
+
+def get_authorized_whatsapp_share(request_id, viewer_id, owner_id):
+    """Return a contact share only for the other participant in an accepted request."""
+    if viewer_id == owner_id:
+        return None
+    req = RoommateRequest.query.filter_by(
+        id=request_id, status=STATUS_ACCEPTED).first()
+    if req is None or {viewer_id, owner_id} != {req.requester_id, req.receiver_id}:
+        return None
+    return WhatsAppShare.query.filter_by(
+        request_id=request_id, owner_id=owner_id, viewer_id=viewer_id).first()

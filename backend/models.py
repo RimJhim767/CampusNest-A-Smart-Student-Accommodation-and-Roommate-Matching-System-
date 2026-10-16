@@ -106,13 +106,17 @@ class Preference(db.Model):
     guest_preference = db.Column(db.String(40), nullable=False)
     pet_preference = db.Column(db.String(30), nullable=False)
 
+    # Phase 6. nullable=True ON PURPOSE: rows saved before Phase 6 have no value, and they must
+    # keep existing. NULL means "not answered yet" -> that user is not eligible for matching.
+    preferred_roommate_gender = db.Column(db.String(10), nullable=True)
+
     created_at = db.Column(db.DateTime, default=utc_now)
     updated_at = db.Column(db.DateTime, default=utc_now, onupdate=utc_now)
 
     user = db.relationship("User", back_populates="preference")
 
     def to_dict(self):
-        return {
+        data = {
             "gender": self.gender,
             "preferred_area": self.preferred_area,
             "min_budget": self.min_budget,
@@ -124,6 +128,11 @@ class Preference(db.Model):
             "guest_preference": self.guest_preference,
             "pet_preference": self.pet_preference,
         }
+        # Phase 6: only included once the owner has answered it. Leaving the key out (instead of
+        # sending null) keeps the Phase 4/5 responses exactly as they were for everyone else.
+        if self.preferred_roommate_gender:
+            data["preferred_roommate_gender"] = self.preferred_roommate_gender
+        return data
 
 
 class RoommateRequest(db.Model):
@@ -169,5 +178,27 @@ class PreferenceShare(db.Model):
     viewer_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     fields = db.Column(db.JSON, nullable=False)     # e.g. ["preferred_area", "sleep_schedule"]
 
+    created_at = db.Column(db.DateTime, default=utc_now)
+    updated_at = db.Column(db.DateTime, default=utc_now, onupdate=utc_now)
+
+
+class WhatsAppShare(db.Model):
+    """One owner's explicitly consented WhatsApp contact for one accepted request.
+
+    Numbers are kept out of User/Profile and are only returned by the request-scoped
+    authorization endpoint. The value is stored in normalized international digits.
+    """
+
+    __tablename__ = "whatsapp_shares"
+    __table_args__ = (
+        db.UniqueConstraint("request_id", "owner_id", name="uq_whatsapp_request_owner"),
+        db.CheckConstraint("owner_id != viewer_id", name="ck_whatsapp_share_not_self"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    request_id = db.Column(db.Integer, db.ForeignKey("roommate_requests.id"), nullable=False)
+    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    viewer_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    phone_number = db.Column(db.String(15), nullable=False)
     created_at = db.Column(db.DateTime, default=utc_now)
     updated_at = db.Column(db.DateTime, default=utc_now, onupdate=utc_now)

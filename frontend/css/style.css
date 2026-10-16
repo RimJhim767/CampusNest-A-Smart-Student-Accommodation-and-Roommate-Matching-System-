@@ -451,6 +451,21 @@ textarea {
   }
 }
 
+@media (max-width: 560px) {
+  .navbar {
+    gap: 8px;
+  }
+
+  .navbar .logo {
+    font-size: 1.15rem;
+  }
+
+  .nav-actions .btn-primary {
+    padding: 10px 8px;
+    font-size: 0.85rem;
+  }
+}
+
 
 /* =========================================================
    Footer
@@ -1110,6 +1125,70 @@ textarea {
   display: none;
 }
 
+.whatsapp-section {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--color-border);
+}
+
+.whatsapp-section h4 {
+  margin: 0;
+}
+
+.whatsapp-consent {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 8px 10px;
+  margin: 16px 0;
+}
+
+.whatsapp-consent > input,
+#rq-received input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 3px 0 0;
+  accent-color: var(--color-primary);
+}
+
+.whatsapp-consent > label,
+.whatsapp-section > label {
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.whatsapp-number-field {
+  grid-column: 1 / -1;
+  width: min(100%, 420px);
+}
+
+.whatsapp-number-field label {
+  display: block;
+  margin: 4px 0 7px;
+  font-weight: 600;
+}
+
+.whatsapp-number-field input {
+  width: 100%;
+}
+
+.whatsapp-number-field .pref-note {
+  margin: 7px 0;
+}
+
+.whatsapp-contact {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 560px) {
+  .whatsapp-section .btn,
+  .whatsapp-consent + .btn {
+    width: 100%;
+  }
+}
+
 .choice-card input:checked + label .check-icon {
   display: inline-block;
 }
@@ -1694,10 +1773,11 @@ textarea {
 
 
 /* =========================================================
-   Demo Banner
+   Match estimate notice
    ========================================================= */
 
-.demo-banner {
+.demo-banner,
+.match-disclaimer {
   background: var(--color-gradient-soft);
 
   border: 1px solid #cdd8ea;
@@ -1815,4 +1895,84 @@ textarea {
 
     transition-duration: 0.001ms !important;
   }
+}
+
+
+/* =========================================================
+   Matches page states (loading / empty / error / log in)
+   ========================================================= */
+
+#matches-root [hidden] {
+  display: none !important;
+}
+
+.state-box {
+  max-width: 560px;
+  margin: 40px auto;
+  padding: 36px 28px;
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.state-box h3 {
+  margin-bottom: 8px;
+}
+
+.state-box p {
+  color: var(--color-ink-soft);
+  margin-bottom: 18px;
+}
+
+.state-box.state-error {
+  border-color: var(--color-purple);
+}
+
+#match-profile-root [hidden] {
+  display: none !important;
+}
+
+.compat-band {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.match-profile-feedback {
+  min-height: 1.4em;
+  margin: 12px 0 0;
+  color: var(--color-ink-soft);
+}
+
+.match-profile-feedback.error {
+  color: var(--color-danger);
+}
+
+.state-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  margin: 0 auto 16px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: matches-spin 0.8s linear infinite;
+}
+
+@keyframes matches-spin {
+  to { transform: rotate(360deg); }
+}
+
+.match-note {
+  font-size: 0.85rem;
+  color: var(--color-ink-faint);
+  margin: -8px 0 16px;
 }

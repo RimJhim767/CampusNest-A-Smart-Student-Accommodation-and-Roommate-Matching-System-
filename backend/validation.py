@@ -4,6 +4,9 @@
 
 # ----- Roommate preferences: values taken from the Google Form -----
 GENDERS = ["Female", "Male"]
+# Phase 6: the gender of roommate the user is willing to live with (survey question
+# "What gender roommate do you prefer?"). Same two options as the survey.
+PREFERRED_ROOMMATE_GENDERS = ["Female", "Male"]
 AREAS = ["Dhonia", "Niribili", "Jalalabad", "Islampur", "Nobinagar"]
 LIFESTYLE_QUALITIES = ["Quiet", "Clean", "Study-friendly", "Social", "Non-smoker"]
 SLEEP_SCHEDULES = ["Early Sleeper", "Flexible", "Night Owl"]
@@ -25,6 +28,11 @@ PREFERENCE_KEYS = {
     "sleep_schedule", "cooking_preference", "expense_preference",
     "guest_preference", "pet_preference",
 }
+
+# Phase 6: keys the preferences form may SEND. This is PREFERENCE_KEYS plus the new field.
+# PREFERENCE_KEYS itself is deliberately NOT changed: Phase 5 uses it as the list of fields a
+# student may share, and the roommate-gender preference stays private to its owner.
+PREFERENCE_WRITE_KEYS = PREFERENCE_KEYS | {"preferred_roommate_gender"}
 
 # ----- Profile page: values taken from your existing profile.html -----
 PROFILE_DEPARTMENTS = [
@@ -77,6 +85,25 @@ def parse_taka(value):
     return number
 
 
+def normalize_whatsapp_number(value):
+    """Validate a user-supplied international number and return digits-only form.
+
+    A leading plus sign is required so the application never guesses a country code.
+    Common visual separators are accepted but not persisted.
+    """
+    if not isinstance(value, str):
+        return None
+    text = value.strip()
+    if not text.startswith("+") or text.count("+") != 1:
+        return None
+    if any(character not in "0123456789 +-()." for character in text):
+        return None
+    digits = "".join(character for character in text if character.isdigit())
+    if not 8 <= len(digits) <= 15 or digits.startswith("0"):
+        return None
+    return digits
+
+
 def _check_choice(data, key, allowed, label, clean, errors):
     value = data.get(key)
     if isinstance(value, str) and value in allowed:
@@ -96,6 +123,13 @@ def validate_preferences(data):
     _check_choice(data, "expense_preference", EXPENSE_PREFERENCES, "shared expenses", clean, errors)
     _check_choice(data, "guest_preference", GUEST_PREFERENCES, "guests", clean, errors)
     _check_choice(data, "pet_preference", PET_PREFERENCES, "pets", clean, errors)
+
+    # Phase 6 (OPTIONAL on purpose, so Phase 4/5 clients that do not know about it still work).
+    # If it is sent it must be valid. If it is not sent, the stored value is left as it is,
+    # and a user who has never set it simply stays ineligible for matching.
+    if "preferred_roommate_gender" in data:
+        _check_choice(data, "preferred_roommate_gender", PREFERRED_ROOMMATE_GENDERS,
+                      "preferred roommate gender", clean, errors)
 
     # Multi-select: a list of allowed values, at least one, no duplicates.
     qualities = data.get("lifestyle_qualities")

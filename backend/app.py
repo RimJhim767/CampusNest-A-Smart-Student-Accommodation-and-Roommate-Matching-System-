@@ -8,15 +8,20 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from models import (
-    db, User, Profile, Preference, RoommateRequest, PreferenceShare,
+    db, User, Profile, Preference, RoommateRequest, PreferenceShare, WhatsAppShare,
     STATUS_PENDING, STATUS_ACCEPTED, STATUS_REJECTED, STATUS_CANCELLED,
     make_pair_key, utc_now,
 )
-from permissions import find_active_request, get_authorized_fields, get_share_fields
+from permissions import (
+    find_active_request, get_authorized_fields, get_authorized_whatsapp_share,
+    get_share_fields, get_whatsapp_share,
+)
+from matching.service import build_match_detail, build_recommendations   # Phase 6
+from migrate_phase6 import ensure_phase6_schema                          # Phase 6
 from validation import (
-    PREFERENCE_KEYS, PROFILE_KEYS,
+    PREFERENCE_KEYS, PREFERENCE_WRITE_KEYS, PROFILE_KEYS,
     find_protected_keys, find_unknown_keys,
-    parse_user_id, validate_field_list,
+    normalize_whatsapp_number, parse_user_id, validate_field_list,
     validate_preferences, validate_profile,
 )
 
@@ -48,6 +53,9 @@ db.init_app(app)
 
 with app.app_context():
     db.create_all()
+    # Phase 6: an existing database gets the one new (empty) column added. Additive only: no row
+    # is changed or removed. For a backup first, run `python migrate_phase6.py` (see docs).
+    ensure_phase6_schema(db.engine)
 
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -316,7 +324,7 @@ def get_preferences():
 @login_required
 def update_preferences():
     data = get_json_dict()
-    bad = reject_bad_body(data, PREFERENCE_KEYS)
+    bad = reject_bad_body(data, PREFERENCE_WRITE_KEYS)      # Phase 6: includes the new field
     if bad:
         return bad
 
@@ -345,6 +353,9 @@ def update_preferences():
     pref.expense_preference = clean["expense_preference"]
     pref.guest_preference = clean["guest_preference"]
     pref.pet_preference = clean["pet_preference"]
+    # Phase 6: only changed when the client sent it. If it was not sent, the old value stays.
+    if "preferred_roommate_gender" in clean:
+        pref.preferred_roommate_gender = clean["preferred_roommate_gender"]
 
     try:
         db.session.commit()
@@ -402,6 +413,8 @@ def request_to_dict(req, me_id):
     other_id = req.receiver_id if req.requester_id == me_id else req.requester_id
     other = db.session.get(User, other_id)
     is_accepted = (req.status == STATUS_ACCEPTED)
+    own_whatsapp_share = get_whatsapp_share(req.id, me_id) if is_accepted else None
+    other_whatsapp_share = get_whatsapp_share(req.id, other_id) if is_accepted else None
     return {
         "id": req.id,
         "status": req.status,
@@ -412,6 +425,8 @@ def request_to_dict(req, me_id):
         # fields I currently share with them / whether they share anything with me
         "i_share": get_share_fields(req.id, me_id) if is_accepted else [],
         "they_share": bool(get_share_fields(req.id, other_id)) if is_accepted else False,
+        "i_share_whatsapp": own_whatsapp_share is not None,
+        "they_share_whatsapp": other_whatsapp_share is not None,
     }
 
 
@@ -494,7 +509,7 @@ def sent_requests():
 @login_required
 def accept_request(request_id):
     data = get_optional_json_dict()
-    bad = reject_bad_body(data, {"share_fields"})
+    bad = reject_bad_body(data, {"share_fields", "share_whatsapp", "phone_number"})
     if bad:
         return bad
 
@@ -514,6 +529,23 @@ def accept_request(request_id):
             return jsonify({"success": False, "message": error,
                             "errors": {"share_fields": error}}), 400
 
+    share_whatsapp = data.get("share_whatsapp", False)
+    if not isinstance(share_whatsapp, bool):
+        return jsonify({"success": False,
+                        "message": "WhatsApp sharing consent must be true or false."}), 400
+    phone_number = None
+    if share_whatsapp:
+        phone_number = normalize_whatsapp_number(data.get("phone_number"))
+        if phone_number is None:
+            return jsonify({
+                "success": False,
+                "message": "Enter a valid international WhatsApp number beginning with +.",
+                "errors": {"phone_number": "Use an international number with its country calling code."},
+            }), 400
+    elif "phone_number" in data:
+        return jsonify({"success": False,
+                        "message": "A WhatsApp number is accepted only when sharing is enabled."}), 400
+
     if req.status != STATUS_PENDING:
         return jsonify({"success": False, "message": "This request is no longer pending."}), 409
 
@@ -524,6 +556,10 @@ def accept_request(request_id):
         if share_fields:
             db.session.add(PreferenceShare(request_id=req.id, owner_id=g.user.id,
                                            viewer_id=req.requester_id, fields=share_fields))
+        if share_whatsapp:
+            db.session.add(WhatsAppShare(
+                request_id=req.id, owner_id=g.user.id, viewer_id=req.requester_id,
+                phone_number=phone_number))
         db.session.commit()            # status change + permission are saved together, or not at all
     except IntegrityError:
         db.session.rollback()
@@ -532,6 +568,78 @@ def accept_request(request_id):
     req = db.session.get(RoommateRequest, request_id)
     return jsonify({"success": True, "message": "Request accepted.",
                     "request": request_to_dict(req, g.user.id)}), 200
+
+
+@app.route("/api/requests/<int:request_id>/whatsapp", methods=["GET", "PUT"])
+@login_required
+def whatsapp_contact(request_id):
+    req = load_my_request(request_id)
+    if req is None:
+        return not_found_request_response()
+    if req.status != STATUS_ACCEPTED:
+        return jsonify({"success": False,
+                        "message": "WhatsApp sharing is available only for accepted requests."}), 409
+
+    if request.method == "GET":
+        owner_id = req.receiver_id if req.requester_id == g.user.id else req.requester_id
+        share = get_authorized_whatsapp_share(request_id, g.user.id, owner_id)
+        if share is None:
+            return jsonify({"success": True, "shared": False}), 200
+        return jsonify({
+            "success": True,
+            "shared": True,
+            "phone_number": share.phone_number,
+        }), 200
+
+    data = get_json_dict()
+    bad = reject_bad_body(data, {"share", "phone_number"})
+    if bad:
+        return bad
+    if "share" not in data or not isinstance(data["share"], bool):
+        return jsonify({"success": False,
+                        "message": "WhatsApp sharing consent must be true or false."}), 400
+
+    share = data["share"]
+    phone_number = None
+    if share:
+        phone_number = normalize_whatsapp_number(data.get("phone_number"))
+        if phone_number is None:
+            return jsonify({
+                "success": False,
+                "message": "Enter a valid international WhatsApp number beginning with +.",
+                "errors": {"phone_number": "Use an international number with its country calling code."},
+            }), 400
+    elif "phone_number" in data:
+        return jsonify({"success": False,
+                        "message": "A WhatsApp number is accepted only when sharing is enabled."}), 400
+
+    owner_id = g.user.id
+    viewer_id = req.receiver_id if req.requester_id == owner_id else req.requester_id
+    stored_share = WhatsAppShare.query.filter_by(
+        request_id=req.id, owner_id=owner_id).first()
+    if share:
+        if stored_share is None:
+            db.session.add(WhatsAppShare(
+                request_id=req.id, owner_id=owner_id, viewer_id=viewer_id,
+                phone_number=phone_number))
+        else:
+            stored_share.viewer_id = viewer_id
+            stored_share.phone_number = phone_number
+    elif stored_share is not None:
+        db.session.delete(stored_share)
+
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({"success": False,
+                        "message": "Could not update WhatsApp sharing. Please try again."}), 409
+
+    return jsonify({
+        "success": True,
+        "message": "WhatsApp sharing updated." if share else "WhatsApp sharing withdrawn.",
+        "shared": share,
+    }), 200
 
 
 # ---------- API: reject (receiver only) ----------
@@ -671,6 +779,49 @@ def shared_preferences(user_id):
         "has_preferences": pref is not None,
         "preferences": shared if pref is not None else None,
     }), 200
+
+
+# =====================================================================
+# Phase 6: roommate recommendations (hard matching, then KNN ranking)
+# The logged-in user is ALWAYS taken from the session. Nothing in the URL, query string or body
+# can choose whose matches are computed. All the logic lives in the matching/ package.
+# =====================================================================
+def matching_failed_response():
+    # No exception text or trace is ever sent to the browser.
+    return jsonify({"success": False,
+                    "message": "Could not load recommendations right now. Please try again."}), 500
+
+
+@app.route("/api/matches", methods=["GET"])
+@login_required
+def list_matches():
+    if foreign_user_id_requested():
+        return forbidden_response()
+    try:
+        payload = build_recommendations(g.user)
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Phase 6 matching failed")
+        return matching_failed_response()
+    return jsonify({"success": True, **payload}), 200
+
+
+@app.route("/api/matches/<int:user_id>", methods=["GET"])
+@login_required
+def match_detail(user_id):
+    """One eligible match. Anyone who is not in the logged-in user's eligible list (including
+    yourself or an id that does not exist) gets the same 404, so ids cannot be probed."""
+    if foreign_user_id_requested():
+        return forbidden_response()
+    try:
+        payload = build_match_detail(g.user, user_id)
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Phase 6 match detail failed")
+        return matching_failed_response()
+    if payload is None:
+        return jsonify({"success": False, "message": "Match not found."}), 404
+    return jsonify({"success": True, **payload}), 200
 
 
 if __name__ == "__main__":

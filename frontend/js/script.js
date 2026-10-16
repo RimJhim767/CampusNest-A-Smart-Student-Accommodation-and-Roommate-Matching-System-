@@ -5,136 +5,6 @@
    same file works everywhere without throwing errors.
    ========================================================= */
 
-/* ---------------------------------------------------------
-   Dummy roommate data
-   In the real app this would come from a database. For this
-   prototype it's a plain JavaScript array that both the
-   matches page and the match-profile page read from.
-   --------------------------------------------------------- */
-const CAMPUSNEST_MATCHES = [
-  {
-    id: "sarah-ahmed",
-    name: "Sarah Ahmed",
-    initials: "SA",
-    dept: "CSE",
-    year: "3rd Year",
-    area: "Dhonia",
-    budgetMin: 4500,
-    budgetMax: 5500,
-    compatibility: 92,
-    about: "Quiet and study-focused student looking for a clean and comfortable shared living environment.",
-    facts: [
-      { type: "yes", text: "Budget compatible" },
-      { type: "yes", text: "Location compatible" },
-      { type: "yes", text: "Quiet environment" },
-      { type: "yes", text: "Study-friendly" }
-    ],
-    why: [
-      "Similar budget",
-      "Same preferred location",
-      "Both prefer quiet environment",
-      "Both prefer study-friendly environment"
-    ],
-    differences: ["Different sleeping schedules"],
-    prefs: ["Quiet", "Clean", "Study-friendly", "Non-smoker"]
-  },
-  {
-    id: "nabila-rahman",
-    name: "Nabila Rahman",
-    initials: "NR",
-    dept: "EEE",
-    year: "2nd Year",
-    area: "Niribili",
-    budgetMin: 4000,
-    budgetMax: 5000,
-    compatibility: 84,
-    about: "Friendly and organized, enjoys a tidy room and doesn't mind occasional guests.",
-    facts: [
-      { type: "yes", text: "Budget compatible" },
-      { type: "yes", text: "Clean" },
-      { type: "partial", text: "Lifestyle partially compatible" }
-    ],
-    why: [
-      "Similar budget range",
-      "Both prefer a clean space",
-      "Both open to occasional guests"
-    ],
-    differences: ["Different preferred locations", "One prefers more social evenings"],
-    prefs: ["Clean", "Social", "Guests welcome"]
-  },
-  {
-    id: "tanvir-hasan",
-    name: "Tanvir Hasan",
-    initials: "TH",
-    dept: "IPE",
-    year: "4th Year",
-    area: "Jalalabad",
-    budgetMin: 3500,
-    budgetMax: 4500,
-    compatibility: 77,
-    about: "Easygoing final-year student, usually out for lab work in the evenings.",
-    facts: [
-      { type: "yes", text: "Budget compatible" },
-      { type: "partial", text: "Sleeping schedule differs" },
-      { type: "yes", text: "Non-smoker" }
-    ],
-    why: [
-      "Overlapping budget range",
-      "Both non-smokers",
-      "Both comfortable sharing expenses"
-    ],
-    differences: ["Different sleeping schedule", "Different preferred area"],
-    prefs: ["Non-smoker", "Shared expenses", "Flexible schedule"]
-  },
-  {
-    id: "farhana-islam",
-    name: "Farhana Islam",
-    initials: "FI",
-    dept: "Textile Engineering",
-    year: "1st Year",
-    area: "Jalalabad",
-    budgetMin: 4000,
-    budgetMax: 4800,
-    compatibility: 68,
-    about: "New to campus, looking for a calm home base close to lectures.",
-    facts: [
-      { type: "yes", text: "Budget compatible" },
-      { type: "partial", text: "Location partially compatible" },
-      { type: "yes", text: "Quiet environment" }
-    ],
-    why: [
-      "Similar budget",
-      "Both prefer a quiet home"
-    ],
-    differences: ["Different preferred area", "Different year of study"],
-    prefs: ["Quiet", "Study-friendly"]
-  },
-  {
-    id: "imran-kabir",
-    name: "Imran Kabir",
-    initials: "IK",
-    dept: "CSE",
-    year: "2nd Year",
-    area: "Nobinagar",
-    budgetMin: 4200,
-    budgetMax: 5200,
-    compatibility: 88,
-    about: "Balances study and hobbies well, keeps shared spaces tidy.",
-    facts: [
-      { type: "yes", text: "Budget compatible" },
-      { type: "yes", text: "Location compatible" },
-      { type: "yes", text: "Clean" }
-    ],
-    why: [
-      "Same preferred location",
-      "Similar budget",
-      "Both value a clean home"
-    ],
-    differences: ["Different sleeping schedule"],
-    prefs: ["Clean", "Study-friendly", "Pet-friendly"]
-  }
-];
-
 document.addEventListener("DOMContentLoaded", function () {
   initMobileNav();
   initAuthNav();
@@ -144,8 +14,8 @@ document.addEventListener("DOMContentLoaded", function () {
   initProfileForm();
   initPreferencesForm();
   initMatchFilters();
+  initMatchesPage();
   initMatchProfilePage();
-  initSendRequestButton();
   initRequestsPage();
 });
 
@@ -542,6 +412,7 @@ function initPreferencesForm() {
   // radio group name in the HTML  ->  API field name
   const radioMap = {
     "gender-pref": "gender",
+    "roommate-gender-pref": "preferred_roommate_gender",
     "sleep-schedule": "sleep_schedule",
     "cooking-pref": "cooking_preference",
     "expense-pref": "expense_preference",
@@ -550,6 +421,7 @@ function initPreferencesForm() {
   };
   const radioLabels = {
     "gender-pref": "your gender",
+    "roommate-gender-pref": "the gender of roommate you prefer",
     "sleep-schedule": "your sleeping schedule",
     "cooking-pref": "your cooking preference",
     "expense-pref": "your shared-expenses preference",
@@ -743,12 +615,53 @@ function initRequestsPage() {
       if (res.ok && res.data.success) {
         showToast(res.data.message || doneMessage, "success");
         loadRequests();
+        return true;
       } else {
         handleFailure(res, "Something went wrong.");
+        return false;
       }
     }).catch(function () {
       showToast("Could not reach the server. Is Flask running?", "error");
+      return false;
     });
+  }
+
+  function normalizeWhatsAppInput(value) {
+    const text = value.trim();
+    if (!/^\+[0-9\s().-]+$/.test(text)) return null;
+    const digits = text.replace(/\D/g, "");
+    return digits.length >= 8 && digits.length <= 15 && digits.charAt(0) !== "0"
+      ? digits
+      : null;
+  }
+
+  function buildWhatsAppInput(prefix, initiallyVisible) {
+    const group = makeEl("div", "whatsapp-number-field");
+    const label = document.createElement("label");
+    const input = document.createElement("input");
+    input.type = "tel";
+    input.id = prefix + "-number";
+    input.name = "whatsapp_number";
+    input.autocomplete = "tel";
+    input.inputMode = "tel";
+    input.placeholder = "+ country calling code and number";
+    input.setAttribute("aria-describedby", prefix + "-help " + prefix + "-error");
+    label.setAttribute("for", input.id);
+    label.textContent = "WhatsApp number";
+    const help = makeEl(
+      "p", "pref-note", "Enter your number in international format, including its country calling code."
+    );
+    help.id = prefix + "-help";
+    const error = makeEl("p", "field-error");
+    error.id = prefix + "-error";
+    error.setAttribute("role", "alert");
+    error.hidden = true;
+    group.appendChild(label);
+    group.appendChild(input);
+    group.appendChild(help);
+    group.appendChild(error);
+    group.hidden = !initiallyVisible;
+    return { node: group, input: input, error: error };
   }
 
   function showSharedPreferences(userId) {
@@ -787,7 +700,10 @@ function initRequestsPage() {
     info.appendChild(makeEl("div", "match-meta", "Student ID " + r.other_user.id + " \u00B7 " + when));
     identity.appendChild(info);
     top.appendChild(identity);
-    top.appendChild(makeEl("span", "tag", r.status.charAt(0).toUpperCase() + r.status.slice(1)));
+    const status = makeEl("span", "tag", r.status.charAt(0).toUpperCase() + r.status.slice(1));
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-label", "Request status: " + r.status);
+    top.appendChild(status);
     card.appendChild(top);
 
     const actions = makeEl("div");
@@ -798,18 +714,74 @@ function initRequestsPage() {
       const picker = buildFieldPicker("accept-" + r.id, []);
       actions.appendChild(picker.node);
 
+      const consent = makeEl("div", "whatsapp-consent");
+      const consentInput = document.createElement("input");
+      consentInput.type = "checkbox";
+      consentInput.id = "accept-whatsapp-" + r.id;
+      const consentLabel = document.createElement("label");
+      consentLabel.setAttribute("for", consentInput.id);
+      consentLabel.textContent =
+        "Share my WhatsApp number with this student so we can communicate.";
+      consent.appendChild(makeEl(
+        "p", "pref-note", "This is optional. You can accept without sharing, and can withdraw sharing later."
+      ));
+      const numberInput = buildWhatsAppInput("accept-whatsapp-" + r.id, false);
+      consentInput.addEventListener("change", function () {
+        numberInput.node.hidden = !consentInput.checked;
+        if (!consentInput.checked) {
+          numberInput.input.value = "";
+          numberInput.error.textContent = "";
+          numberInput.error.hidden = true;
+          numberInput.input.removeAttribute("aria-invalid");
+        }
+      });
+      consent.appendChild(consentInput);
+      consent.appendChild(consentLabel);
+      consent.appendChild(numberInput.node);
+      actions.appendChild(consent);
+
       const acceptBtn = makeEl("button", "btn btn-primary", "Accept");
       acceptBtn.type = "button";
-      acceptBtn.addEventListener("click", function () {
-        acceptBtn.disabled = true;
-        sendAction("PUT", "/api/requests/" + r.id + "/accept", { share_fields: picker.getSelected() }, "Request accepted.");
-      });
       const rejectBtn = makeEl("button", "btn btn-secondary", "Reject");
       rejectBtn.type = "button";
       rejectBtn.style.marginLeft = "10px";
+      acceptBtn.addEventListener("click", function () {
+        const body = { share_fields: picker.getSelected(), share_whatsapp: consentInput.checked };
+        if (consentInput.checked) {
+          const normalized = normalizeWhatsAppInput(numberInput.input.value);
+          if (!normalized) {
+            numberInput.error.textContent =
+              "Enter a valid international number with its country calling code.";
+            numberInput.error.hidden = false;
+            numberInput.input.setAttribute("aria-invalid", "true");
+            numberInput.input.focus();
+            return;
+          }
+          numberInput.error.textContent = "";
+          numberInput.error.hidden = true;
+          numberInput.input.removeAttribute("aria-invalid");
+          body.phone_number = "+" + normalized;
+        }
+        acceptBtn.disabled = true;
+        rejectBtn.disabled = true;
+        sendAction("PUT", "/api/requests/" + r.id + "/accept", body, "Request accepted.")
+          .then(function (ok) {
+            if (!ok) {
+              acceptBtn.disabled = false;
+              rejectBtn.disabled = false;
+            }
+          });
+      });
       rejectBtn.addEventListener("click", function () {
         rejectBtn.disabled = true;
-        sendAction("PUT", "/api/requests/" + r.id + "/reject", {}, "Request rejected.");
+        acceptBtn.disabled = true;
+        sendAction("PUT", "/api/requests/" + r.id + "/reject", {}, "Request rejected.")
+          .then(function (ok) {
+            if (!ok) {
+              acceptBtn.disabled = false;
+              rejectBtn.disabled = false;
+            }
+          });
       });
       actions.appendChild(acceptBtn);
       actions.appendChild(rejectBtn);
@@ -843,6 +815,123 @@ function initRequestsPage() {
       } else {
         actions.appendChild(makeEl("p", "pref-note", r.other_user.name + " has not shared any preferences with you."));
       }
+
+      const contactSection = makeEl("div", "whatsapp-section");
+      contactSection.appendChild(makeEl("h4", "", "WhatsApp contact"));
+      if (r.i_share_whatsapp) {
+        contactSection.appendChild(makeEl(
+          "p", "pref-note", "You have shared your WhatsApp number with " + r.other_user.name + "."
+        ));
+        const revokeButton = makeEl("button", "btn btn-secondary", "Stop sharing WhatsApp number");
+        revokeButton.type = "button";
+        revokeButton.addEventListener("click", function () {
+          revokeButton.disabled = true;
+          sendAction("PUT", "/api/requests/" + r.id + "/whatsapp", { share: false },
+            "WhatsApp sharing withdrawn.").then(function (ok) {
+              if (!ok) revokeButton.disabled = false;
+            });
+        });
+        contactSection.appendChild(revokeButton);
+      } else {
+        contactSection.appendChild(makeEl(
+          "p", "pref-note", "Your WhatsApp number has not been shared with this student."
+        ));
+        const ownConsent = document.createElement("input");
+        ownConsent.type = "checkbox";
+        ownConsent.id = "share-whatsapp-" + r.id;
+        const ownLabel = document.createElement("label");
+        ownLabel.setAttribute("for", ownConsent.id);
+        ownLabel.textContent =
+          "Share my WhatsApp number with this student so we can communicate.";
+        const ownNumber = buildWhatsAppInput("share-whatsapp-" + r.id, false);
+        ownConsent.addEventListener("change", function () {
+          ownNumber.node.hidden = !ownConsent.checked;
+          if (!ownConsent.checked) {
+            ownNumber.input.value = "";
+            ownNumber.error.textContent = "";
+            ownNumber.error.hidden = true;
+            ownNumber.input.removeAttribute("aria-invalid");
+          }
+        });
+        contactSection.appendChild(ownConsent);
+        contactSection.appendChild(ownLabel);
+        contactSection.appendChild(ownNumber.node);
+        const shareButton = makeEl("button", "btn btn-primary", "Save WhatsApp sharing");
+        shareButton.type = "button";
+        shareButton.addEventListener("click", function () {
+          if (!ownConsent.checked) {
+            ownNumber.error.textContent = "Select the consent checkbox before sharing your number.";
+            ownNumber.error.hidden = false;
+            ownConsent.focus();
+            return;
+          }
+          const normalized = normalizeWhatsAppInput(ownNumber.input.value);
+          if (!normalized) {
+            ownNumber.error.textContent =
+              "Enter a valid international number with its country calling code.";
+            ownNumber.error.hidden = false;
+            ownNumber.input.setAttribute("aria-invalid", "true");
+            ownNumber.input.focus();
+            return;
+          }
+          ownNumber.error.textContent = "";
+          ownNumber.error.hidden = true;
+          ownNumber.input.removeAttribute("aria-invalid");
+          shareButton.disabled = true;
+          sendAction("PUT", "/api/requests/" + r.id + "/whatsapp", {
+            share: true, phone_number: "+" + normalized,
+          }, "WhatsApp sharing saved.").then(function (ok) {
+            if (!ok) shareButton.disabled = false;
+          });
+        });
+        contactSection.appendChild(shareButton);
+      }
+
+      if (r.they_share_whatsapp) {
+        const viewContactButton = makeEl("button", "btn btn-accent", "Show shared WhatsApp contact");
+        viewContactButton.type = "button";
+        const contactOutput = makeEl("div", "whatsapp-contact");
+        contactOutput.setAttribute("aria-live", "polite");
+        viewContactButton.addEventListener("click", function () {
+          viewContactButton.disabled = true;
+          apiRequest("GET", "/api/requests/" + r.id + "/whatsapp").then(function (res) {
+            viewContactButton.disabled = false;
+            contactOutput.textContent = "";
+            if (res.status === 401) { redirectToLogin(); return; }
+            if (!res.ok || !res.data.success) {
+              handleFailure(res, "Could not load the shared WhatsApp contact.");
+              return;
+            }
+            if (!res.data.shared) {
+              contactOutput.appendChild(makeEl(
+                "p", "pref-note", r.other_user.name + " has not shared their WhatsApp number."
+              ));
+              return;
+            }
+            if (typeof res.data.phone_number !== "string" ||
+                !/^[1-9][0-9]{7,14}$/.test(res.data.phone_number)) {
+              showToast("The shared WhatsApp contact could not be displayed.", "error");
+              return;
+            }
+            contactOutput.appendChild(makeEl("p", "", "WhatsApp number: " + res.data.phone_number));
+            const chatLink = makeEl("a", "btn btn-accent", "Chat on WhatsApp");
+            chatLink.href = "https://wa.me/" + res.data.phone_number;
+            chatLink.target = "_blank";
+            chatLink.rel = "noopener noreferrer";
+            contactOutput.appendChild(chatLink);
+          }).catch(function () {
+            viewContactButton.disabled = false;
+            showToast("Could not reach the server. Is Flask running?", "error");
+          });
+        });
+        contactSection.appendChild(viewContactButton);
+        contactSection.appendChild(contactOutput);
+      } else {
+        contactSection.appendChild(makeEl(
+          "p", "pref-note", r.other_user.name + " has not shared their WhatsApp number."
+        ));
+      }
+      actions.appendChild(contactSection);
     }
     card.appendChild(actions);
     return card;
@@ -882,7 +971,7 @@ function initRequestsPage() {
     }
   }).catch(function () {});
 
-  // Send a request (temporary test tool until matching exists)
+  // Manual student-ID request entry remains available alongside match-based requests.
   const sendBtn = document.getElementById("rq-send-btn");
   const idInput = document.getElementById("rq-receiver-id");
   sendBtn.addEventListener("click", function () {
@@ -967,93 +1056,516 @@ function initMatchFilters() {
 }
 
 /* ---------------------------------------------------------
-   Match profile page
-   Reads ?id= from the URL and fills the page from
-   CAMPUSNEST_MATCHES. Falls back to the first entry.
+   Matches page (matches.html): real recommendations
+   Fetches GET /api/matches (the logged-in student, taken from the
+   Flask session) and draws one card per recommendation.
+   It shows ONLY what that API returns: first name, department, year,
+   a coarse band, reasons and request status. All text is inserted with
+   textContent (never innerHTML), so nothing from the server can inject HTML.
+   --------------------------------------------------------- */
+const MATCH_BANDS = ["Strong", "Good", "Fair"];
+const MATCH_STATUSES = ["ok", "no_matches", "needs_profile", "needs_preferences",
+                        "needs_roommate_gender", "invalid_preferences"];
+
+function initMatchesPage() {
+  const root = document.getElementById("matches-root");
+  if (!root) return;
+
+  const notice = document.getElementById("matches-notice");
+  const stateBox = document.getElementById("matches-state");
+  const results = document.getElementById("matches-results");
+  const grid = document.getElementById("match-grid");
+  const countEl = document.getElementById("match-count");
+  const countLabel = document.getElementById("match-count-label");
+  const filterSelect = document.getElementById("filter-band");
+  const filterCount = document.getElementById("filter-count");
+  const filterEmpty = document.getElementById("filter-empty");
+  if (!notice || !stateBox || !results || !grid || !countEl || !countLabel ||
+      !filterSelect || !filterCount || !filterEmpty) return;
+
+  let isLoading = false;   // stops a second request while one is already running
+
+  // ---- state boxes -------------------------------------------------
+  function clearState() { stateBox.textContent = ""; }
+
+  function showState(kind, title, message, actions) {
+    clearState();
+    results.hidden = true;
+    stateBox.setAttribute("aria-busy", String(kind === "loading"));
+    const box = makeEl("div", "state-box" + (kind === "error" ? " state-error" : ""));
+    box.setAttribute("role", kind === "error" ? "alert" : "status");
+    if (kind === "loading") {
+      const spinner = makeEl("div", "spinner");
+      spinner.setAttribute("aria-hidden", "true");
+      box.appendChild(spinner);
+    }
+    box.appendChild(makeEl("h3", "", title));
+    if (message) box.appendChild(makeEl("p", "", message));
+    if (actions && actions.length) {
+      const row = makeEl("div", "state-actions");
+      actions.forEach(function (a) {
+        if (a.href) {
+          const link = makeEl("a", "btn " + (a.secondary ? "btn-secondary" : "btn-primary"), a.text);
+          link.href = a.href;
+          row.appendChild(link);
+        } else {
+          const btn = makeEl("button", "btn " + (a.secondary ? "btn-secondary" : "btn-primary"), a.text);
+          btn.type = "button";
+          btn.addEventListener("click", a.onClick);
+          row.appendChild(btn);
+        }
+      });
+      box.appendChild(row);
+    }
+    stateBox.appendChild(box);
+  }
+
+  function showError(message) {
+    notice.hidden = true;
+    showState("error", "We could not load your matches", message,
+              [{ text: "Try again", onClick: loadMatches }]);
+  }
+
+  // ---- checking the API data before drawing it ----------------------
+  function textList(value) {
+    if (!Array.isArray(value)) return [];
+    return value.filter(function (x) { return typeof x === "string" && x.trim() !== ""; });
+  }
+
+  // Returns a clean card object, or null if this entry is not usable.
+  function cleanMatch(raw) {
+    if (!raw || typeof raw !== "object") return null;
+    if (!Number.isInteger(raw.user_id) || raw.user_id <= 0) return null;
+    if (typeof raw.first_name !== "string" || raw.first_name.trim() === "") return null;
+    if (MATCH_BANDS.indexOf(raw.compatibility_band) === -1) return null;
+
+    let request = null;
+    if (raw.request && typeof raw.request === "object" &&
+        typeof raw.request.status === "string" &&
+        (raw.request.direction === "sent" || raw.request.direction === "received")) {
+      request = { status: raw.request.status, direction: raw.request.direction };
+    }
+    return {
+      id: raw.user_id,
+      firstName: raw.first_name.trim(),
+      department: typeof raw.department === "string" ? raw.department.trim() : "",
+      year: typeof raw.year === "string" ? raw.year.trim() : "",
+      band: raw.compatibility_band,
+      reasons: textList(raw.reasons),
+      differences: textList(raw.differences),
+      canViewShared: raw.can_view_shared_preferences === true,
+      request: request
+    };
+  }
+
+  function requestNote(request) {
+    if (!request) return "";
+    if (request.status === "pending" && request.direction === "sent") return "Roommate request sent. Waiting for a reply.";
+    if (request.status === "pending" && request.direction === "received") return "This student sent you a roommate request.";
+    if (request.status === "accepted") return "Roommate request accepted.";
+    return "";
+  }
+
+  // ---- drawing ------------------------------------------------------
+  function buildCard(m) {
+    const card = makeEl("div", "match-card" + (m.band === "Strong" ? "" : " compat-med"));
+    card.setAttribute("data-band", m.band);
+
+    const top = makeEl("div", "match-card-top");
+    const identity = makeEl("div", "match-identity");
+    identity.appendChild(makeEl("div", "avatar", nameInitials(m.firstName)));
+    const who = makeEl("div");
+    who.appendChild(makeEl("h3", "", m.firstName));
+    const meta = [m.department, m.year].filter(function (x) { return x !== ""; }).join(" \u2022 ");
+    who.appendChild(makeEl("div", "match-meta", meta || "NITER student"));
+    identity.appendChild(who);
+    top.appendChild(identity);
+
+    const badge = makeEl("div", "compat-badge");
+    badge.appendChild(makeEl("div", "compat-num", m.band));
+    badge.appendChild(makeEl("div", "compat-label", "Estimated match"));
+    top.appendChild(badge);
+    card.appendChild(top);
+
+    const facts = makeEl("ul", "match-facts");
+    m.reasons.forEach(function (text) {
+      const li = makeEl("li");
+      li.appendChild(makeEl("span", "fact-yes", "\u2713"));
+      li.appendChild(document.createTextNode(" " + text));
+      facts.appendChild(li);
+    });
+    m.differences.forEach(function (text) {
+      const li = makeEl("li");
+      li.appendChild(makeEl("span", "fact-partial", "~"));
+      li.appendChild(document.createTextNode(" " + text));
+      facts.appendChild(li);
+    });
+    card.appendChild(facts);
+
+    const notes = [requestNote(m.request)];
+    if (m.canViewShared) notes.push("This student has shared some preferences with you.");
+    notes.filter(function (t) { return t !== ""; }).forEach(function (t) {
+      card.appendChild(makeEl("p", "match-note", t));
+    });
+
+    // Real user id, same ?id= convention the profile page already reads.
+    const link = makeEl("a", "btn btn-primary btn-block", "View Profile");
+    link.href = "match-profile.html?id=" + encodeURIComponent(String(m.id));
+    card.appendChild(link);
+    return card;
+  }
+
+  function applyBandFilter() {
+    const wanted = filterSelect.value;
+    let visible = 0;
+    grid.querySelectorAll(".match-card").forEach(function (card) {
+      const show = wanted === "all" || card.getAttribute("data-band") === wanted;
+      card.style.display = show ? "" : "none";
+      if (show) visible++;
+    });
+    filterCount.textContent = visible + (visible === 1 ? " match shown" : " matches shown");
+    filterEmpty.hidden = visible !== 0;
+  }
+
+  function showMatches(cards, disclaimer) {
+    clearState();
+    grid.textContent = "";
+    const fragment = document.createDocumentFragment();
+    cards.forEach(function (m) { fragment.appendChild(buildCard(m)); });
+    grid.appendChild(fragment);
+
+    countEl.textContent = String(cards.length);
+    countLabel.textContent = cards.length === 1 ? "potential match found" : "potential matches found";
+    filterSelect.value = "all";
+    notice.textContent = typeof disclaimer === "string" ? disclaimer : "";
+    notice.hidden = notice.textContent === "";
+    results.hidden = false;
+    applyBandFilter();
+  }
+
+  // ---- reading the response -----------------------------------------
+  const SETUP_TEXT = {
+    needs_profile: ["Complete your profile first", "Please complete your profile to see roommate matches.",
+                    "profile.html", "Go to my profile"],
+    needs_preferences: ["Save your preferences first", "Please save your roommate preferences to see matches.",
+                        "preferences.html", "Go to my preferences"],
+    needs_roommate_gender: ["One more question", "Please choose which gender of roommate you prefer and save your preferences again.",
+                            "preferences.html", "Update my preferences"],
+    invalid_preferences: ["Please review your preferences", "Some of your saved preferences are incomplete. Please review and save them again.",
+                          "preferences.html", "Update my preferences"]
+  };
+
+  function handleData(data) {
+    if (!data || typeof data !== "object" || data.success !== true ||
+        typeof data.status !== "string" || MATCH_STATUSES.indexOf(data.status) === -1) {
+      showError("The server sent an unexpected answer. Please try again in a moment.");
+      return;
+    }
+
+    if (SETUP_TEXT[data.status]) {
+      const t = SETUP_TEXT[data.status];
+      notice.hidden = true;
+      showState("info", t[0], t[1], [{ text: t[3], href: t[2] }]);
+      return;
+    }
+
+    let rawList = data.matches;
+    if (data.status === "no_matches") rawList = [];
+    if (!Array.isArray(rawList)) {
+      showError("The server sent an unexpected answer. Please try again in a moment.");
+      return;
+    }
+
+    const cards = rawList.map(cleanMatch).filter(function (c) { return c !== null; });
+    if (rawList.length > 0 && cards.length === 0) {
+      showError("The server sent matches in an unexpected format. Please try again in a moment.");
+      return;
+    }
+
+    if (cards.length === 0) {
+      notice.hidden = true;
+      showState("info", "No matches yet",
+                "No students match your essential requirements right now. Check back later as more students join, or review your preferences.",
+                [{ text: "Review my preferences", href: "preferences.html", secondary: true }]);
+      return;
+    }
+
+    showMatches(cards, data.disclaimer);
+  }
+
+  function loadMatches() {
+    if (isLoading) return;          // ignore double clicks and repeat calls
+    isLoading = true;
+    notice.hidden = true;
+    showState("loading", "Finding your matches\u2026", "", null);
+
+    apiRequest("GET", "/api/matches")
+      .then(function (res) {
+        isLoading = false;
+        if (res.status === 401) {
+          notice.hidden = true;
+          showState("info", "Please log in", "Log in to see your roommate matches.",
+                    [{ text: "Log in", href: "login.html" }]);
+          return;
+        }
+        if (!res.ok) {
+          showError("Something went wrong on the server. Please try again.");
+          return;
+        }
+        handleData(res.data);
+      })
+      .catch(function () {
+        isLoading = false;
+        showError("Could not reach the server. Is Flask running?");
+      });
+  }
+
+  filterSelect.addEventListener("change", applyBandFilter);   // attached once
+  loadMatches();
+}
+
+/* ---------------------------------------------------------
+   Match profile page (GET /api/matches/<id>)
+   Only the match API's privacy-filtered fields are rendered here.
    --------------------------------------------------------- */
 function initMatchProfilePage() {
   const root = document.getElementById("match-profile-root");
   if (!root) return;
 
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get("id");
-  const match = CAMPUSNEST_MATCHES.find(function (m) { return m.id === id; }) || CAMPUSNEST_MATCHES[0];
-
-  setText("mp-name", match.name);
-  setText("mp-avatar", match.initials);
-  setText("mp-meta", match.dept + " \u2022 " + match.year);
-  setText("mp-area", match.area);
-  setText("mp-budget", "\u09F3" + match.budgetMin.toLocaleString() + "\u2013" + match.budgetMax.toLocaleString() + "/month");
-  setText("mp-about", match.about);
-  setText("mp-compat-num", match.compatibility + "%");
-
-  fillList("mp-why", match.why, "yes");
-  fillList("mp-diff", match.differences, "diff");
-  fillTags("mp-prefs", match.prefs);
-  drawCompatRing(match.compatibility);
-
+  const state = document.getElementById("match-profile-state");
+  const content = document.getElementById("match-profile-content");
+  const feedback = document.getElementById("match-profile-feedback");
   const sendBtn = document.getElementById("send-request-btn");
-  if (sendBtn) sendBtn.setAttribute("data-name", match.name);
-}
 
-function setText(id, text) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = text;
-}
+  if (!state || !content || !feedback || !sendBtn) return;
 
-function fillList(id, items, kind) {
-  const el = document.getElementById(id);
-  if (!el || !items) return;
-  el.innerHTML = "";
-  items.forEach(function (item) {
-    const li = document.createElement("li");
-    if (kind === "yes") {
-      li.innerHTML = '<span class="fact-yes">\u2713</span> ' + item;
-    } else {
-      li.textContent = item;
+  function showState(kind, title, message, linkText, href) {
+    state.textContent = "";
+    state.className = "state-box" + (kind === "error" ? " state-error" : "");
+    state.setAttribute("role", kind === "error" ? "alert" : "status");
+    state.setAttribute("aria-busy", "false");
+    state.appendChild(makeEl("h2", "", title));
+    if (message) state.appendChild(makeEl("p", "", message));
+    if (linkText && href) {
+      const link = makeEl("a", "btn btn-primary", linkText);
+      link.href = href;
+      state.appendChild(link);
     }
-    el.appendChild(li);
+    state.hidden = false;
+    content.hidden = true;
+  }
+
+  function showLoading() {
+    state.textContent = "";
+    state.className = "state-box";
+    state.setAttribute("role", "status");
+    state.setAttribute("aria-busy", "true");
+    const spinner = makeEl("div", "spinner");
+    spinner.setAttribute("aria-hidden", "true");
+    state.appendChild(spinner);
+    state.appendChild(makeEl("h2", "", "Loading match"));
+    state.appendChild(makeEl("p", "", "Please wait while we check that this student is still eligible."));
+    state.hidden = false;
+    content.hidden = true;
+  }
+
+  function setFeedback(message, isError) {
+    feedback.textContent = message || "";
+    feedback.className = isError ? "match-profile-feedback error" : "match-profile-feedback";
+    feedback.setAttribute("role", isError ? "alert" : "status");
+  }
+
+  function validateMatch(raw, requestedId) {
+    if (!raw || typeof raw !== "object" ||
+        !Number.isSafeInteger(raw.user_id) || raw.user_id !== requestedId ||
+        typeof raw.first_name !== "string" || raw.first_name.trim() === "" ||
+        !["Strong", "Good", "Fair"].includes(raw.compatibility_band) ||
+        !Array.isArray(raw.reasons) || !Array.isArray(raw.differences)) {
+      return null;
+    }
+    if (raw.department !== null && typeof raw.department !== "string") return null;
+    if (raw.year !== null && typeof raw.year !== "string") return null;
+    if (!raw.reasons.every(function (item) { return typeof item === "string"; }) ||
+        !raw.differences.every(function (item) { return typeof item === "string"; })) {
+      return null;
+    }
+
+    let requestState = null;
+    if (raw.request !== null) {
+      if (!raw.request || typeof raw.request !== "object" ||
+          !["pending", "accepted"].includes(raw.request.status) ||
+          !["sent", "received"].includes(raw.request.direction)) {
+        return null;
+      }
+      requestState = { status: raw.request.status, direction: raw.request.direction };
+    }
+    return {
+      userId: raw.user_id,
+      firstName: raw.first_name.trim(),
+      department: raw.department || "",
+      year: raw.year || "",
+      band: raw.compatibility_band,
+      reasons: raw.reasons,
+      differences: raw.differences,
+      request: requestState
+    };
+  }
+
+  function renderList(listId, items, kind) {
+    const list = document.getElementById(listId);
+    list.textContent = "";
+    items.forEach(function (text) {
+      const item = makeEl("li");
+      item.appendChild(makeEl("span", kind === "reason" ? "fact-yes" : "fact-partial",
+                             kind === "reason" ? "\u2713" : "~"));
+      item.appendChild(document.createTextNode(" " + text));
+      list.appendChild(item);
+    });
+    list.hidden = items.length === 0;
+  }
+
+  function renderRequestState(request) {
+    sendBtn.disabled = false;
+    sendBtn.textContent = "Send Roommate Request";
+    sendBtn.classList.add("btn-accent");
+    sendBtn.classList.remove("btn-secondary");
+    if (!request) return;
+
+    sendBtn.disabled = true;
+    sendBtn.classList.remove("btn-accent");
+    sendBtn.classList.add("btn-secondary");
+    if (request.status === "accepted") {
+      sendBtn.textContent = "Already Connected";
+      setFeedback("This roommate request has been accepted.", false);
+    } else if (request.direction === "sent") {
+      sendBtn.textContent = "Request Sent";
+      setFeedback("Your roommate request is pending.", false);
+    } else {
+      sendBtn.textContent = "Request Received";
+      setFeedback("This student has already sent you a request. You can respond on the requests page.", false);
+    }
+  }
+
+  function renderMatch(match, disclaimer) {
+    document.getElementById("mp-name").textContent = match.firstName;
+    document.getElementById("mp-avatar").textContent = nameInitials(match.firstName);
+    document.getElementById("mp-meta").textContent =
+      [match.department, match.year].filter(function (part) { return part !== ""; }).join(" \u2022 ") ||
+      "NITER student";
+    document.getElementById("mp-band").textContent = match.band;
+    document.getElementById("match-disclaimer").textContent =
+      typeof disclaimer === "string" && disclaimer.trim() ? disclaimer : "Compatibility is an estimate.";
+    renderList("mp-why", match.reasons, "reason");
+    renderList("mp-diff", match.differences, "difference");
+    renderRequestState(match.request);
+    state.hidden = true;
+    content.hidden = false;
+  }
+
+  function loadMatch(requestedId, refresh) {
+    if (!refresh) showLoading();
+    return apiRequest("GET", "/api/matches/" + encodeURIComponent(String(requestedId)))
+      .then(function (res) {
+        if (res.status === 401) {
+          showState("info", "Please log in", "Log in to view this roommate match.", "Log in", "login.html");
+          return;
+        }
+        if (res.status === 404) {
+          showState("info", "Match unavailable",
+                    "This match is unavailable or no longer meets your requirements.",
+                    "Back to matches", "matches.html");
+          return;
+        }
+        if (!res.ok || !res.data || res.data.success !== true) {
+          showState("error", "Could not load this match",
+                    (res.data && typeof res.data.message === "string" && res.data.message) ||
+                    "Please try again.", "Retry", "match-profile.html?id=" + encodeURIComponent(String(requestedId)));
+          return;
+        }
+        if (res.data.status !== "ok" || !res.data.match) {
+          const setupMessages = {
+            needs_profile: "Complete your profile before viewing matches.",
+            needs_preferences: "Save your roommate preferences before viewing matches.",
+            needs_roommate_gender: "Choose your preferred roommate gender and save your preferences.",
+            invalid_preferences: "Review and save your roommate preferences again.",
+            no_matches: "There are no eligible matches right now."
+          };
+          showState("info", "Match unavailable",
+                    setupMessages[res.data.status] || "This match is unavailable or no longer eligible.",
+                    "Back to matches", "matches.html");
+          return;
+        }
+
+        const match = validateMatch(res.data.match, requestedId);
+        if (!match) {
+          showState("error", "Unexpected match response",
+                    "The server returned match details in an unexpected format.",
+                    "Retry", "match-profile.html?id=" + encodeURIComponent(String(requestedId)));
+          return;
+        }
+        renderMatch(match, res.data.disclaimer);
+      })
+      .catch(function () {
+        showState("error", "Could not reach the server",
+                  "Check your connection and try again.", "Retry",
+                  "match-profile.html?id=" + encodeURIComponent(String(requestedId)));
+      });
+  }
+
+  const idText = new URLSearchParams(window.location.search).get("id");
+  if (!idText || !/^[1-9]\d*$/.test(idText)) {
+    showState("info", "Invalid match link", "The match ID is missing or invalid.", "Back to matches", "matches.html");
+    return;
+  }
+  const requestedId = Number(idText);
+  if (!Number.isSafeInteger(requestedId)) {
+    showState("info", "Invalid match link", "The match ID is missing or invalid.", "Back to matches", "matches.html");
+    return;
+  }
+
+  sendBtn.addEventListener("click", function () {
+    if (sendBtn.disabled) return;
+    sendBtn.disabled = true;
+    sendBtn.textContent = "Sending request\u2026";
+    setFeedback("", false);
+    apiRequest("POST", "/api/requests", { receiver_id: requestedId })
+      .then(function (res) {
+        if (res.status === 201 && res.data && res.data.success === true &&
+            res.data.request && res.data.request.status === "pending" &&
+            res.data.request.direction === "sent") {
+          renderRequestState({ status: "pending", direction: "sent" });
+          setFeedback(res.data.message || "Roommate request sent.", false);
+          return;
+        }
+        const message = res.data && typeof res.data.message === "string" && res.data.message
+          ? res.data.message : "Could not send the roommate request.";
+        if (res.status === 201) {
+          const unexpectedMessage = "The server returned an unexpected response. Refreshing request status.";
+          setFeedback(unexpectedMessage, true);
+          loadMatch(requestedId, true).then(function () { setFeedback(unexpectedMessage, true); });
+          return;
+        }
+        setFeedback(message, true);
+        if (res.status === 409) {
+          loadMatch(requestedId, true).then(function () { setFeedback(message, true); });
+        } else if (res.status === 401) {
+          sendBtn.disabled = true;
+          const login = makeEl("a", "", " Log in");
+          login.href = "login.html";
+          feedback.appendChild(login);
+        } else {
+          sendBtn.disabled = false;
+          sendBtn.textContent = "Send Roommate Request";
+        }
+      })
+      .catch(function () {
+        sendBtn.disabled = false;
+        sendBtn.textContent = "Send Roommate Request";
+        setFeedback("Could not reach the server. Please try again.", true);
+      });
   });
-}
 
-function fillTags(id, items) {
-  const el = document.getElementById(id);
-  if (!el || !items) return;
-  el.innerHTML = "";
-  items.forEach(function (item) {
-    const span = document.createElement("span");
-    span.className = "tag";
-    span.textContent = item;
-    el.appendChild(span);
-  });
-}
-
-/* Draws a simple circular progress ring using SVG stroke-dasharray */
-function drawCompatRing(percent) {
-  const circle = document.getElementById("mp-ring-fill");
-  if (!circle) return;
-  const radius = circle.r.baseVal.value;
-  const circumference = 2 * Math.PI * radius;
-  circle.style.strokeDasharray = circumference + " " + circumference;
-  circle.style.strokeDashoffset = circumference - (percent / 100) * circumference;
-}
-
-/* ---------------------------------------------------------
-   Send Roommate Request button
-   --------------------------------------------------------- */
-function initSendRequestButton() {
-  const btn = document.getElementById("send-request-btn");
-  if (!btn) return;
-
-  btn.addEventListener("click", function () {
-    if (btn.disabled) return;
-    const name = btn.getAttribute("data-name") || "this student";
-    showToast("Roommate request sent successfully!", "success");
-    btn.textContent = "Request Sent";
-    btn.disabled = true;
-    btn.classList.add("btn-secondary");
-    btn.classList.remove("btn-accent");
-  });
+  loadMatch(requestedId, false);
 }
 
 /* ---------------------------------------------------------
@@ -1066,12 +1578,16 @@ function showToast(message, type) {
   if (!stack) {
     stack = document.createElement("div");
     stack.className = "toast-stack";
+    stack.setAttribute("aria-live", "polite");
+    stack.setAttribute("aria-relevant", "additions");
     document.body.appendChild(stack);
   }
 
   const toast = document.createElement("div");
   toast.className = "toast" + (type === "error" ? " toast-error" : " toast-success");
-  toast.innerHTML = '<span class="toast-icon">' + (type === "error" ? "\u26A0" : "\u2713") + "</span><span>" + message + "</span>";
+  toast.setAttribute("role", type === "error" ? "alert" : "status");
+  toast.appendChild(makeEl("span", "toast-icon", type === "error" ? "\u26A0" : "\u2713"));
+  toast.appendChild(makeEl("span", "", message));
   stack.appendChild(toast);
 
   setTimeout(function () {

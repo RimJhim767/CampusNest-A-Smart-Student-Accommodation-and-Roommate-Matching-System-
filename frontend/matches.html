@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="stylesheet" href="style.css">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Your roommate matches — CampusNest</title>
@@ -37,169 +36,36 @@
       <h1>Your roommate matches</h1>
     </div>
 
-    <div class="demo-banner">
-      These are demo profiles created for this prototype — not real NITER students.
-    </div>
+    <div id="matches-root">
 
-    <div class="match-summary">
-      <strong>5</strong>
-      <span>potential matches found</span>
-    </div>
+      <!-- Estimate notice: text comes from the server (GET /api/matches "disclaimer") -->
+      <div id="matches-notice" class="demo-banner" hidden></div>
 
-    <div class="filters-bar">
-      <div>
-        <label for="filter-location">Location</label>
-        <select id="filter-location">
-          <option value="all">All areas</option>
-          <option value="Dhonia">Dhonia</option>
-          <option value="Niribili">Niribili</option>
-          <option value="Islampur">Islampur</option>
-          <option value="Jalalabad">Jalalabad</option>
-          <option value="Nobinagar">Nobinagar</option>
-        </select>
-      </div>
-      <div>
-        <label for="filter-budget">Budget</label>
-        <select id="filter-budget">
-          <option value="all">Any budget</option>
-          <option value="under4000">Under ৳4,000</option>
-          <option value="4000to5000">৳4,000–5,000</option>
-          <option value="over5000">Above ৳5,000</option>
-        </select>
-      </div>
-      <div>
-        <label for="filter-compat">Compatibility</label>
-        <select id="filter-compat">
-          <option value="all">Any compatibility</option>
-          <option value="90">90% and above</option>
-          <option value="80">80% and above</option>
-          <option value="70">70% and above</option>
-        </select>
-      </div>
-      <div class="filter-count">5 matches shown</div>
-    </div>
+      <!-- Loading / empty / error / logged-out / setup-needed messages are drawn here by js/script.js -->
+      <div id="matches-state" aria-live="polite" aria-busy="false"></div>
 
-    <div class="match-grid">
-
-      <!-- Sarah Ahmed -->
-      <div class="match-card" data-location="Dhonia" data-budget-max="5500" data-compat="92">
-        <div class="match-card-top">
-          <div class="match-identity">
-            <div class="avatar">SA</div>
-            <div>
-              <h3>Sarah Ahmed</h3>
-              <div class="match-meta">CSE • 3rd Year · Dhonia · ৳4,500–5,500/month</div>
-            </div>
-          </div>
-          <div class="compat-badge">
-            <div class="compat-num">92%</div>
-            <div class="compat-label">Match</div>
-          </div>
+      <div id="matches-results" hidden>
+        <div class="match-summary">
+          <strong id="match-count">0</strong>
+          <span id="match-count-label">potential matches found</span>
         </div>
-        <div class="compat-bar"><div class="compat-bar-fill" style="width: 92%;"></div></div>
-        <ul class="match-facts">
-          <li><span class="fact-yes">✓</span> Budget compatible</li>
-          <li><span class="fact-yes">✓</span> Location compatible</li>
-          <li><span class="fact-yes">✓</span> Quiet environment</li>
-          <li><span class="fact-yes">✓</span> Study-friendly</li>
-        </ul>
-        <a href="match-profile.html?id=sarah-ahmed" class="btn btn-primary btn-block">View Profile</a>
-      </div>
 
-      <!-- Nabila Rahman -->
-      <div class="match-card compat-med" data-location="Niribili" data-budget-max="5000" data-compat="84">
-        <div class="match-card-top">
-          <div class="match-identity">
-            <div class="avatar">NR</div>
-            <div>
-              <h3>Nabila Rahman</h3>
-              <div class="match-meta">EEE • 2nd Year · Niribili · ৳4,000–5,000/month</div>
-            </div>
+        <div class="filters-bar">
+          <div>
+            <label for="filter-band">Compatibility</label>
+            <select id="filter-band">
+              <option value="all">Any compatibility</option>
+              <option value="Strong">Strong</option>
+              <option value="Good">Good</option>
+              <option value="Fair">Fair</option>
+            </select>
           </div>
-          <div class="compat-badge">
-            <div class="compat-num">84%</div>
-            <div class="compat-label">Match</div>
-          </div>
+          <div class="filter-count" id="filter-count" aria-live="polite"></div>
         </div>
-        <div class="compat-bar"><div class="compat-bar-fill" style="width: 84%;"></div></div>
-        <ul class="match-facts">
-          <li><span class="fact-yes">✓</span> Budget compatible</li>
-          <li><span class="fact-yes">✓</span> Clean</li>
-          <li><span class="fact-partial">~</span> Lifestyle partially compatible</li>
-        </ul>
-        <a href="match-profile.html?id=nabila-rahman" class="btn btn-primary btn-block">View Profile</a>
-      </div>
 
-      <!-- Imran Kabir -->
-      <div class="match-card" data-location="Nobinagar" data-budget-max="5200" data-compat="88">
-        <div class="match-card-top">
-          <div class="match-identity">
-            <div class="avatar">IK</div>
-            <div>
-              <h3>Imran Kabir</h3>
-              <div class="match-meta">CSE • 2nd Year · Nobinagar · ৳4,200–5,200/month</div>
-            </div>
-          </div>
-          <div class="compat-badge">
-            <div class="compat-num">88%</div>
-            <div class="compat-label">Match</div>
-          </div>
-        </div>
-        <div class="compat-bar"><div class="compat-bar-fill" style="width: 88%;"></div></div>
-        <ul class="match-facts">
-          <li><span class="fact-yes">✓</span> Location compatible</li>
-          <li><span class="fact-yes">✓</span> Budget compatible</li>
-          <li><span class="fact-yes">✓</span> Clean</li>
-        </ul>
-        <a href="match-profile.html?id=imran-kabir" class="btn btn-primary btn-block">View Profile</a>
-      </div>
+        <p id="filter-empty" class="pref-note" hidden>No matches in this compatibility band. Choose "Any compatibility" to see everyone.</p>
 
-      <!-- Tanvir Hasan -->
-      <div class="match-card compat-med" data-location="Jalalabad" data-budget-max="4500" data-compat="77">
-        <div class="match-card-top">
-          <div class="match-identity">
-            <div class="avatar">TH</div>
-            <div>
-              <h3>Tanvir Hasan</h3>
-              <div class="match-meta">IPE • 4th Year · Jalalabad · ৳3,500–4,500/month</div>
-            </div>
-          </div>
-          <div class="compat-badge">
-            <div class="compat-num">77%</div>
-            <div class="compat-label">Match</div>
-          </div>
-        </div>
-        <div class="compat-bar"><div class="compat-bar-fill" style="width: 77%;"></div></div>
-        <ul class="match-facts">
-          <li><span class="fact-yes">✓</span> Budget compatible</li>
-          <li><span class="fact-yes">✓</span> Non-smoker</li>
-          <li><span class="fact-partial">~</span> Sleeping schedule differs</li>
-        </ul>
-        <a href="match-profile.html?id=tanvir-hasan" class="btn btn-primary btn-block">View Profile</a>
-      </div>
-
-      <!-- Farhana Islam -->
-      <div class="match-card compat-med" data-location="Jalalabad" data-budget-max="4800" data-compat="68">
-        <div class="match-card-top">
-          <div class="match-identity">
-            <div class="avatar">FI</div>
-            <div>
-              <h3>Farhana Islam</h3>
-              <div class="match-meta">Textile Engineering • 1st Year · Jalalabad · ৳4,000–4,800/month</div>
-            </div>
-          </div>
-          <div class="compat-badge">
-            <div class="compat-num">68%</div>
-            <div class="compat-label">Match</div>
-          </div>
-        </div>
-        <div class="compat-bar"><div class="compat-bar-fill" style="width: 68%;"></div></div>
-        <ul class="match-facts">
-          <li><span class="fact-yes">✓</span> Budget compatible</li>
-          <li><span class="fact-yes">✓</span> Quiet environment</li>
-          <li><span class="fact-partial">~</span> Location partially compatible</li>
-        </ul>
-        <a href="match-profile.html?id=farhana-islam" class="btn btn-primary btn-block">View Profile</a>
+        <div class="match-grid" id="match-grid"></div>
       </div>
 
     </div>

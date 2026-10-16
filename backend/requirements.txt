@@ -1,2 +1,4 @@
 Flask
 Flask-SQLAlchemy
+scikit-learn>=1.6
+numpy>=2.1
